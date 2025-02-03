@@ -34,8 +34,6 @@ namespace CartasYBarajas
                     }
 
                     // Cartas especiales de color
-                    Cartas.Add(new Carta(TipoCarta.cambioDeDireccion.ToString(), color));
-                    Cartas.Add(new Carta(TipoCarta.salto.ToString(), color));
                     Cartas.Add(new Carta(TipoCarta.masDos.ToString(), color));
                 }
 
@@ -79,10 +77,11 @@ namespace CartasYBarajas
         // Metodo Mostrar cartas
         public void MostrarCartas()
         {
-            foreach (Carta carta in Cartas)
+            for (int i = 0; i< Cartas.Count; i++)
             {
-                Console.Write($"{carta.ToString()},");
+                Cartas[i].ImprimeCarta($"{i} ");
             }
+            Console.WriteLine();
         }
 
         public void ColocarCarta(Carta carta)

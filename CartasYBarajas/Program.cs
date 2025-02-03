@@ -27,19 +27,15 @@ namespace CartasYBarajas
             while (Salir)
             {
 
-                Console.WriteLine("Pulsa cualquier boton para continuar...");
-                Console.ReadLine();
-
                 Console.Clear();
-                Console.WriteLine($"La ultima carta es :{UltimaCarta.ToString()}");
+                UltimaCarta.ImprimeCarta("La ultima carta es :");
 
                 Console.WriteLine(@"
 ====================
 1. Barajar Cartas
 2. Robar Cartas
-3. Mostrar Baraja
-4. Mostrar Mazo
-5. Jugar Carta
+3. Mostrar Mazo
+4. Jugar Carta
 0. Salir
 ====================");
 
@@ -54,18 +50,18 @@ namespace CartasYBarajas
                         RobarCarta();
                         break;
                     case 3:
-                        MostrarBaraja();
-                        break;
-                    case 4:
                         MostrarMazo();
                         break;
-                    case 5:
+                    case 4:
                         JugarCarta();
                         break;
                     case 0:
                         Salir = false;
                         break;
                 }
+
+                Console.WriteLine("Pulsa cualquier boton para continuar...");
+                Console.ReadLine();
 
             }
         }
@@ -83,12 +79,12 @@ namespace CartasYBarajas
             do
             {
                 carta = Baraja.Robar(1);
-                if (carta.Colores == Color.negro)
+                if (carta.Colores == Color.negro || !int.TryParse(carta.Tipo, out _))
                     Baraja.ColocarCarta(carta);
                 else
                     UltimaCarta = carta;
             }
-            while (Baraja.Cartas[0].Colores == Color.negro);
+            while (Baraja.Cartas[0].Colores == Color.negro || !int.TryParse(carta.Tipo, out _));
         }
 
         static int EsUnNumeroCorrecto(int numeroCorrecto, int limites, int minimo = 0)
@@ -96,7 +92,7 @@ namespace CartasYBarajas
             while (true)
             {
                 Console.Write("> ");
-                if (int.TryParse(Console.ReadLine(), out numeroCorrecto) && numeroCorrecto > minimo && numeroCorrecto <= limites)
+                if (int.TryParse(Console.ReadLine(), out numeroCorrecto) && numeroCorrecto >= minimo && numeroCorrecto <= limites)
                     return numeroCorrecto;
                 else
                     Console.WriteLine("Numero no valido");
@@ -130,9 +126,9 @@ namespace CartasYBarajas
                     carta = Baraja.Robar(eleccion);
                     break;
                 case 2:
-                    Console.WriteLine("Dime que posicion:");
+                    Console.WriteLine("Dime que posicion en numeros:");
                     Baraja.MostrarCartas();
-
+                    
                     posicionDeCarta = EsUnNumeroCorrecto(posicionDeCarta, Baraja.TamañoDeLaBaraja());
 
                     carta = Baraja.Robar(eleccion,posicionDeCarta);
@@ -148,14 +144,14 @@ namespace CartasYBarajas
             else
                 Jugador2.AñadirCartas(carta);
 
-            Console.WriteLine($"Has robado la carta {carta.ToString()}");
+            carta.ImprimeCarta("Has robado la carta ");
         }
 
-        static void MostrarBaraja() 
+        /*static void MostrarBaraja()
         {
             Console.WriteLine("Estas son las cartas en la baraja: ");
             Baraja.MostrarCartas();
-        }
+        }*/
 
         static void MostrarMazo() 
         {
@@ -164,23 +160,28 @@ namespace CartasYBarajas
                 Jugador1.MostrarMano();
             else
                 Jugador2.MostrarMano();
-
-            
         }
 
         static void JugarCarta() 
         {
             bool sePuedeJugar = false;
             bool esCartaEspecial = true;
-            int limites = (EsTurnoJugador1 ? Jugador1.Cartas.Count() : Jugador2.Cartas.Count());
             int eleccion = 0;
-            List<Carta> carta = (EsTurnoJugador1 ? Jugador1.Cartas : Jugador2.Cartas);
 
-            foreach (Carta c in carta)
+            Mazo mazoActual = (EsTurnoJugador1 ? Jugador1 : Jugador2);
+
+            int limites = mazoActual.Cartas.Count();
+            List<Carta> cartas = mazoActual.Cartas;
+            Carta cartaActual;
+
+            // Comprueba que tiene una carta compatible con la carta en la mesa
+            foreach (Carta c in cartas)
             {
+                esCartaEspecial = !int.TryParse(c.Tipo, out _);
                 if ((c.Colores == UltimaCarta.Colores || c.Tipo == UltimaCarta.Tipo) || esCartaEspecial)
                     sePuedeJugar = true;
             }
+            // Si no tiene carta te hecha para atras y te obliga a robar
             if(!sePuedeJugar)
             {
                 Console.WriteLine($"No tienes ninguna carta que sea igual que {UltimaCarta}");
@@ -194,12 +195,102 @@ namespace CartasYBarajas
             {
                 eleccion = EsUnNumeroCorrecto(eleccion, limites);
 
+                cartaActual = mazoActual.Cartas[eleccion];
+
+                // Comprueba si la carta que usas es especial
+                esCartaEspecial = !int.TryParse(cartaActual.Tipo, out _);
+
+                if ((cartaActual.Colores == UltimaCarta.Colores || cartaActual.Tipo == UltimaCarta.Tipo) && !esCartaEspecial)
+                {
+                    UltimaCarta = cartaActual;
+                    mazoActual.SacarCarta(eleccion);
+                    break;
+                }
+                else if (esCartaEspecial && (cartaActual.Colores == UltimaCarta.Colores || cartaActual.Colores == Color.negro))
+                {
+                    // Genero el efecto de la carta
+                    EfectosDeCartasEspeciales(ref cartaActual);
+                    // la carta ya sea que se haya modificado algo o no vuelve al mazo actual
+                    mazoActual.Cartas[eleccion] = cartaActual;
+
+                    UltimaCarta = mazoActual.Cartas[eleccion];
+                    mazoActual.SacarCarta(eleccion);
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("No tiene ni el mismo color ni el mismo numero, selecciona otra cosa");
+                }
+
+                
 
 
-            } while (!esCartaEspecial);
+            } while (true);
 
+            // Cambia el turno
+            EsTurnoJugador1 = !EsTurnoJugador1;
+        }
 
+        static void EfectosDeCartasEspeciales(ref Carta carta)
+        {
+            int eleccion = 0;
+            Mazo mazoRival = (EsTurnoJugador1 ? Jugador2 : Jugador1);
 
+            switch (carta.Tipo)
+            {
+                case "masDos":
+                    for (int i = 0; i < 3; i++)
+                    {
+                        mazoRival.AñadirCartas(Baraja.Robar(1));
+                    }
+                    break;
+                case "masCuatro":
+                    for (int i = 0; i < 5; i++)
+                    {
+                        mazoRival.AñadirCartas(Baraja.Robar(1));
+                    }
+                    Console.WriteLine("A que color quieres ponerlo? ");
+                    Console.WriteLine("1.Rojo, 2.Amarillo, 3.Verde. 4.Azul");
+                    eleccion = EsUnNumeroCorrecto(eleccion, 4, 1);
+
+                    switch (eleccion)
+                    {
+                        case 1:
+                            carta.Colores = Color.rojo;
+                            break;
+                        case 2:
+                            carta.Colores = Color.amarillo;
+                            break;
+                        case 3:
+                            carta.Colores = Color.verde;
+                            break;
+                        case 4:
+                            carta.Colores = Color.azul;
+                            break;
+                    }
+                    break;
+                case "cambioDeColor":
+                    Console.WriteLine("A que color quieres ponerlo? ");
+                    Console.WriteLine("1.Rojo, 2.Amarillo, 3.Verde. 4.Azul");
+                    eleccion = EsUnNumeroCorrecto(eleccion, 4, 1);
+
+                    switch (eleccion)
+                    {
+                        case 1:
+                            carta.Colores = Color.rojo;
+                            break;
+                        case 2:
+                            carta.Colores = Color.amarillo;
+                            break;
+                        case 3:
+                            carta.Colores = Color.verde;
+                            break;
+                        case 4:
+                            carta.Colores = Color.azul;
+                            break;
+                    }
+                    break;
+            }
         }
     }
 }

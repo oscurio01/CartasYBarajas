@@ -23,10 +23,11 @@ namespace CartasYBarajas
         public void MostrarMano()
         {
             Console.WriteLine("Tus cartas son:");
-            foreach (Carta carta in Cartas)
+            for (int i = 0; i < Cartas.Count; i++)
             {
-                Console.WriteLine(carta.ToString());
+                Cartas[i].ImprimeCarta($"{i}/");
             }
+            Console.WriteLine();
         }
 
         public Carta SacarCarta(int numero)
