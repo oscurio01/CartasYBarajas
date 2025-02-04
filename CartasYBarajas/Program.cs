@@ -9,7 +9,7 @@ namespace CartasYBarajas
     internal class Program
     {
         static bool EsTurnoJugador1 = true;
-        static bool Salir = true;
+        static bool Salir = false;
         static Carta UltimaCarta;
         static Baraja Baraja;
         static Mazo Jugador1;
@@ -22,12 +22,15 @@ namespace CartasYBarajas
             Jugador1 = new Mazo();
             Jugador2 = new Mazo();
 
+            Mazo mazoDeSalida;
+
             IniciarMazos();
 
-            while (Salir)
+            while (!Salir)
             {
 
                 Console.Clear();
+                Console.WriteLine($"Turno del jugador {(EsTurnoJugador1 ? "1" : "2")}");
                 UltimaCarta.ImprimeCarta("La ultima carta es :");
 
                 Console.WriteLine(@"
@@ -36,10 +39,9 @@ namespace CartasYBarajas
 2. Robar Cartas
 3. Mostrar Mazo
 4. Jugar Carta
-0. Salir
 ====================");
 
-                eleccion = EsUnNumeroCorrecto(eleccion, 5, 0);
+                eleccion = EsUnNumeroCorrecto(eleccion, 24, 1);
 
                 switch (eleccion)
                 {
@@ -55,15 +57,27 @@ namespace CartasYBarajas
                     case 4:
                         JugarCarta();
                         break;
-                    case 0:
-                        Salir = false;
+                    case 24:
+                        mazoDeSalida = (EsTurnoJugador1 ? Jugador1 : Jugador2);
+                        int cartasTotales = mazoDeSalida.Cartas.Count;
+
+                        for (int i = 0; i < cartasTotales; i++)
+                        {
+                            mazoDeSalida.SacarCarta(0);
+                        }
+
+                        Salir = true;
                         break;
                 }
 
                 Console.WriteLine("Pulsa cualquier boton para continuar...");
                 Console.ReadLine();
-
             }
+
+            mazoDeSalida = (EsTurnoJugador1 ? Jugador1 : Jugador2);
+            if (mazoDeSalida.Cartas.Count == 0)
+                Console.WriteLine($"Has ganado jugador {(EsTurnoJugador1 ? "1" : "2")}");
+
         }
 
         static void IniciarMazos()
@@ -226,6 +240,13 @@ namespace CartasYBarajas
 
 
             } while (true);
+
+            if (mazoActual.Cartas.Count == 0)
+            {
+                Salir = true;
+                return;
+            }
+
 
             // Cambia el turno
             EsTurnoJugador1 = !EsTurnoJugador1;
