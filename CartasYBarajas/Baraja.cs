@@ -66,7 +66,7 @@ namespace CartasYBarajas
             else if (eleccion == TipoDeRobo.Aleatorio)
             {
                 Random rand = new Random();
-                numero = rand.Next();
+                numero = rand.Next(0, Cartas.Count());
             }
             Carta carta = Cartas[numero];
             Cartas.RemoveAt(numero);
