@@ -17,8 +17,6 @@ namespace CartasYBarajas
         static Mazo Jugador2;
         static void Main(string[] args)
         {
-            int eleccion = 0;
-
             Baraja = new Baraja();
             Jugador1 = new Mazo();
             Jugador2 = new Mazo();
@@ -29,50 +27,7 @@ namespace CartasYBarajas
 
             while (!Salir)
             {
-
-                Console.Clear();
-                Console.WriteLine($"Turno del jugador {(EsTurnoJugador1 ? "1" : "2")}");
-                UltimaCarta.ImprimeCarta("La ultima carta es :");
-
-                Console.WriteLine(@"
-====================
-1. Barajar Cartas
-2. Robar Cartas
-3. Mostrar Mazo
-4. Jugar Carta
-====================");
-
-                eleccion = LeerUnNumeroCorrecto(24, 1);
-
-                switch (eleccion)
-                {
-                    case 1:
-                        BarajarCartas();
-                        break;
-                    case 2:
-                        RobarCarta();
-                        break;
-                    case 3:
-                        MostrarMazo();
-                        break;
-                    case 4:
-                        JugarCarta();
-                        break;
-                    case 24:
-                        mazoDeSalida = (EsTurnoJugador1 ? Jugador1 : Jugador2);
-                        int cartasTotales = mazoDeSalida.Cartas.Count;
-
-                        for (int i = 0; i < cartasTotales; i++)
-                        {
-                            mazoDeSalida.SacarCarta(0);
-                        }
-
-                        Salir = true;
-                        break;
-                }
-
-                Console.WriteLine("Pulsa cualquier boton para continuar...");
-                Console.ReadLine();
+                JugarPartida();
             }
 
             mazoDeSalida = (EsTurnoJugador1 ? Jugador1 : Jugador2);
@@ -116,6 +71,56 @@ namespace CartasYBarajas
             }
         }
 
+        static void JugarPartida()
+        {
+            int eleccion = 0;
+            Mazo mazoDeSalida;
+
+            Console.Clear();
+            Console.WriteLine($"Turno del jugador {(EsTurnoJugador1 ? "1" : "2")}");
+            UltimaCarta.ImprimeCarta("La ultima carta es :");
+
+            Console.WriteLine(@"
+====================
+1. Barajar Cartas
+2. Robar Cartas
+3. Mostrar Mazo
+4. Jugar Carta
+====================");
+
+            eleccion = LeerUnNumeroCorrecto(24, 1);
+
+            switch (eleccion)
+            {
+                case 1:
+                    BarajarCartas();
+                    break;
+                case 2:
+                    RobarCarta();
+                    break;
+                case 3:
+                    MostrarMazo();
+                    break;
+                case 4:
+                    JugarCarta();
+                    break;
+                case 24:
+                    mazoDeSalida = (EsTurnoJugador1 ? Jugador1 : Jugador2);
+                    int cartasTotales = mazoDeSalida.Cartas.Count;
+
+                    for (int i = 0; i < cartasTotales; i++)
+                    {
+                        mazoDeSalida.SacarCarta(0);
+                    }
+
+                    Salir = true;
+                    break;
+            }
+
+            Console.WriteLine("Pulsa cualquier boton para continuar...");
+            Console.ReadLine();
+        }
+
         static void BarajarCartas() 
         {
             Baraja.Barajar();
@@ -146,7 +151,7 @@ namespace CartasYBarajas
                     Console.WriteLine("Dime que posicion en numeros:");
                     Baraja.MostrarCartas();
                     
-                    posicionDeCarta = LeerUnNumeroCorrecto(posicionDeCarta, Baraja.TamañoDeLaBaraja());
+                    posicionDeCarta = LeerUnNumeroCorrecto(Baraja.TamañoDeLaBaraja(), 1);
 
                     carta = Baraja.Robar((TipoDeRobo)eleccion,posicionDeCarta-1);
 
