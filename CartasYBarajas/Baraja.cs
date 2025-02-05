@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace CartasYBarajas
 {
-    // Una baraja consta de 12 cartas aleatorias las cuales van bajando de numero segun de van usando,
-    // Solo se pueden usar si o el color coincide o el numero coincide
+    // Una baraja consta de 108 cartas aleatorias las cuales van bajando de numero segun de van robando,
     // Deberia añadir las cartas especiales las cuales cambian de color o te hacen un +2 y +4 
+
+    public enum TipoDeRobo { Ninguno, PrimeroEnLaBaraja, SeleccionarCarta, Aleatorio}
     public class Baraja
     {
         public List<Carta> Cartas { get; set; }
@@ -58,12 +59,11 @@ namespace CartasYBarajas
         }
 
         // Robar
-        public Carta Robar(int eleccion, int numero = 0)
+        public Carta Robar(TipoDeRobo eleccion, int numero = 0)
         {
             if (Cartas.Count == 0)
                 return null;
-
-            else if (eleccion == 3)
+            else if (eleccion == TipoDeRobo.Aleatorio)
             {
                 Random rand = new Random();
                 numero = rand.Next();
@@ -79,7 +79,7 @@ namespace CartasYBarajas
         {
             for (int i = 0; i< Cartas.Count; i++)
             {
-                Cartas[i].ImprimeCarta($"{i} ");
+                Cartas[i].ImprimeCarta($"{i+1} ");
             }
             Console.WriteLine();
         }

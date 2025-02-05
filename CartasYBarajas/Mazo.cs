@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace CartasYBarajas
 {
+    // Un mazo consta de 7 cartas aleatorias las cuales van bajando de numero segun de van sacando,
+    // Solo se pueden usar si o el color coincide o el numero coincide
     internal class Mazo
     {
         public List<Carta> Cartas { get; set; }
@@ -25,7 +27,7 @@ namespace CartasYBarajas
             Console.WriteLine("Tus cartas son:");
             for (int i = 0; i < Cartas.Count; i++)
             {
-                Cartas[i].ImprimeCarta($"{i}/");
+                Cartas[i].ImprimeCarta($"{i+1}/");
             }
             Console.WriteLine();
         }

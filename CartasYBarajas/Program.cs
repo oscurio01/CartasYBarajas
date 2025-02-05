@@ -10,6 +10,7 @@ namespace CartasYBarajas
     {
         static bool EsTurnoJugador1 = true;
         static bool Salir = false;
+        static int cartasEnUnMazo = 7;
         static Carta UltimaCarta;
         static Baraja Baraja;
         static Mazo Jugador1;
@@ -84,15 +85,15 @@ namespace CartasYBarajas
         {
             Carta carta;
 
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i <= cartasEnUnMazo; i++)
             {
-                Jugador1.AñadirCartas(Baraja.Robar(1));
-                Jugador2.AñadirCartas(Baraja.Robar(1));
+                Jugador1.AñadirCartas(Baraja.Robar(TipoDeRobo.PrimeroEnLaBaraja));
+                Jugador2.AñadirCartas(Baraja.Robar(TipoDeRobo.PrimeroEnLaBaraja));
             }
 
             do
             {
-                carta = Baraja.Robar(1);
+                carta = Baraja.Robar(TipoDeRobo.PrimeroEnLaBaraja);
                 if (carta.Colores == Color.negro || !int.TryParse(carta.Tipo, out _))
                     Baraja.ColocarCarta(carta);
                 else
@@ -137,7 +138,7 @@ namespace CartasYBarajas
             switch (eleccion)
             {
                 case 1:
-                    carta = Baraja.Robar(eleccion);
+                    carta = Baraja.Robar((TipoDeRobo)eleccion);
                     break;
                 case 2:
                     Console.WriteLine("Dime que posicion en numeros:");
@@ -145,11 +146,11 @@ namespace CartasYBarajas
                     
                     posicionDeCarta = EsUnNumeroCorrecto(posicionDeCarta, Baraja.TamañoDeLaBaraja());
 
-                    carta = Baraja.Robar(eleccion,posicionDeCarta);
+                    carta = Baraja.Robar((TipoDeRobo)eleccion,posicionDeCarta-1);
 
                     break;
                 case 3:
-                    carta = Baraja.Robar(eleccion);
+                    carta = Baraja.Robar((TipoDeRobo)eleccion);
                     break;
             }
 
@@ -160,12 +161,6 @@ namespace CartasYBarajas
 
             carta.ImprimeCarta("Has robado la carta ");
         }
-
-        /*static void MostrarBaraja()
-        {
-            Console.WriteLine("Estas son las cartas en la baraja: ");
-            Baraja.MostrarCartas();
-        }*/
 
         static void MostrarMazo() 
         {
@@ -192,24 +187,27 @@ namespace CartasYBarajas
             foreach (Carta c in cartas)
             {
                 esCartaEspecial = !int.TryParse(c.Tipo, out _);
-                if ((c.Colores == UltimaCarta.Colores || c.Tipo == UltimaCarta.Tipo) || esCartaEspecial)
+                if ((c.Colores == UltimaCarta.Colores || c.Tipo == UltimaCarta.Tipo) || 
+                    (esCartaEspecial && c.Colores == UltimaCarta.Colores)|| c.Colores == Color.negro)
                     sePuedeJugar = true;
             }
             // Si no tiene carta te hecha para atras y te obliga a robar
             if(!sePuedeJugar)
             {
-                Console.WriteLine($"No tienes ninguna carta que sea igual que {UltimaCarta}");
+                UltimaCarta.ImprimeCarta("No tienes ninguna carta que sea igual que ");
+                Console.WriteLine();
                 return;
             }
 
             MostrarMazo();
             Console.WriteLine("Dime que carta vas a usar:");
 
+            // Hasta que la carta que usas en el mazo no sea igual en algo o especial no puedes dejar esa carta
             do
             {
-                eleccion = EsUnNumeroCorrecto(eleccion, limites);
+                eleccion = EsUnNumeroCorrecto(eleccion, limites, 1);
 
-                cartaActual = mazoActual.Cartas[eleccion];
+                cartaActual = mazoActual.Cartas[eleccion-1];
 
                 // Comprueba si la carta que usas es especial
                 esCartaEspecial = !int.TryParse(cartaActual.Tipo, out _);
@@ -217,7 +215,7 @@ namespace CartasYBarajas
                 if ((cartaActual.Colores == UltimaCarta.Colores || cartaActual.Tipo == UltimaCarta.Tipo) && !esCartaEspecial)
                 {
                     UltimaCarta = cartaActual;
-                    mazoActual.SacarCarta(eleccion);
+                    mazoActual.SacarCarta(eleccion-1);
                     break;
                 }
                 else if (esCartaEspecial && (cartaActual.Colores == UltimaCarta.Colores || cartaActual.Colores == Color.negro))
@@ -225,10 +223,10 @@ namespace CartasYBarajas
                     // Genero el efecto de la carta
                     EfectosDeCartasEspeciales(ref cartaActual);
                     // la carta ya sea que se haya modificado algo o no vuelve al mazo actual
-                    mazoActual.Cartas[eleccion] = cartaActual;
+                    mazoActual.Cartas[eleccion - 1] = cartaActual;
 
-                    UltimaCarta = mazoActual.Cartas[eleccion];
-                    mazoActual.SacarCarta(eleccion);
+                    UltimaCarta = mazoActual.Cartas[eleccion-1];
+                    mazoActual.SacarCarta(eleccion - 1);
                     break;
                 }
                 else
@@ -262,13 +260,13 @@ namespace CartasYBarajas
                 case "masDos":
                     for (int i = 0; i < 3; i++)
                     {
-                        mazoRival.AñadirCartas(Baraja.Robar(1));
+                        mazoRival.AñadirCartas(Baraja.Robar(TipoDeRobo.PrimeroEnLaBaraja));
                     }
                     break;
                 case "masCuatro":
                     for (int i = 0; i < 5; i++)
                     {
-                        mazoRival.AñadirCartas(Baraja.Robar(1));
+                        mazoRival.AñadirCartas(Baraja.Robar(TipoDeRobo.PrimeroEnLaBaraja));
                     }
                     Console.WriteLine("A que color quieres ponerlo? ");
                     Console.WriteLine("1.Rojo, 2.Amarillo, 3.Verde. 4.Azul");
